@@ -1,18 +1,5 @@
 import { HypersyncClient, Decoder } from "@envio-dev/hypersync-client";
-
-// Check if an address was provided as a command-line argument
-if (process.argv.length < 3) {
-  console.error("Please provide an Ethereum address as a parameter.");
-  process.exit(1);
-}
-
-// Get the target address from command-line arguments and validate it
-const targetAddress = process.argv[2].toLowerCase();
-
-if (!/^0x[a-fA-F0-9]{40}$/.test(targetAddress)) {
-  console.error("Invalid Ethereum address provided.");
-  process.exit(1);
-}
+import { erc20InThreshold, erc20OutThreshold, targetAddress } from "./config";
 
 // Convert address to topic for filtering. Padds the address with zeroes.
 function addressToTopic(address: string): string {
@@ -113,20 +100,20 @@ async function main() {
 
       const to = log.indexed[1].val as string;
       const value = log.body[0].val as bigint;
-      const address = rawLogData.address.toLowerCase();
+      const erc20Address = rawLogData.address.toLowerCase();
       const from = log.indexed[0].val as string;
 
-      if (!erc20_volumes[address]) {
-        erc20_volumes[address] = { in: BigInt(0), out: BigInt(0), count_in: 0, count_out: 0 };
+      if (!erc20_volumes[erc20Address]) {
+        erc20_volumes[erc20Address] = { in: BigInt(0), out: BigInt(0), count_in: 0, count_out: 0 };
       }
 
       if (from === targetAddress) {
-        erc20_volumes[address].out += value;
-        erc20_volumes[address].count_out++;
+        erc20_volumes[erc20Address].out += value;
+        erc20_volumes[erc20Address].count_out++;
       }
       if (to === targetAddress) {
-        erc20_volumes[address].in += value;
-        erc20_volumes[address].count_in++;
+        erc20_volumes[erc20Address].in += value;
+        erc20_volumes[erc20Address].count_in++;
       }
     }
 
@@ -156,10 +143,12 @@ async function main() {
   console.log("ERC20 token transactions and volumes:");
 
   for (const [address, volume] of Object.entries(erc20_volumes)) {
-    console.log(`Token: ${address}`);
-    console.log(`  Total # of ERC20 transactions - in: ${volume.count_in} out: ${volume.count_out}`);
-    console.log(`  Total ERC20 volume in: ${volume.in}`);
-    console.log(`  Total ERC20 volume out: ${volume.out}`);
+    if (volume.count_in >= erc20InThreshold && volume.count_out <= erc20OutThreshold) {
+      console.log(`Token: ${address}`);
+      console.log(`  Total # of ERC20 transactions - in: ${volume.count_in} out: ${volume.count_out}`);
+      console.log(`  Total ERC20 volume in: ${volume.in}`);
+      console.log(`  Total ERC20 volume out: ${volume.out}`);
+    }
   }
 }
 

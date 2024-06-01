@@ -4,9 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "bun run src/index.ts",
-    "start-ts": "ts-node src/index.ts",
-    "build": "bun build src/index.ts"
+    "start": "ts-node src/index.ts"
   },
   "keywords": [],
   "author": "",
