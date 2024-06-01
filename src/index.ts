@@ -1,7 +1,20 @@
 import { HypersyncClient, Decoder } from "@envio-dev/hypersync-client";
 
-// The addresses we want to get data for
-const targetAddress = "0x89e51fa8ca5d66cd220baed62ed01e8951aa7c40".toLowerCase();
+console.log(process.argv);
+
+// Check if an address was provided as a command-line argument
+if (process.argv.length < 3) {
+  console.error("Please provide an Ethereum address as a parameter.");
+  process.exit(1);
+}
+
+// Get the target address from command-line arguments and validate it
+const targetAddress = process.argv[2].toLowerCase();
+
+if (!/^0x[a-fA-F0-9]{40}$/.test(targetAddress)) {
+  console.error("Invalid Ethereum address provided.");
+  process.exit(1);
+}
 
 // Convert address to topic for filtering. Padds the address with zeroes.
 function addressToTopic(address: string): string {
