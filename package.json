@@ -1,0 +1,21 @@
+{
+  "name": "address-transactions",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "start-ts": "ts-node src/index.ts",
+    "build": "bun build src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^4.5.4"
+  },
+  "dependencies": {
+    "@envio-dev/hypersync-client": "^0.2.2",
+    "ts-node": "^10.9.2"
+  }
+}
