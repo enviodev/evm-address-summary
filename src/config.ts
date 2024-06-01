@@ -14,5 +14,6 @@ if (!/^0x[a-fA-F0-9]{40}$/.test(targetAddress)) {
 
 export const erc20InThreshold = 3;
 export const erc20OutThreshold = 3;
+export const hyperSyncEndpoint = "https://eth.hypersync.xyz"; // More networks can be found here: https://docs.envio.dev/docs/hypersync-url-endpoints
 export { targetAddress };
 

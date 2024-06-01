@@ -1,5 +1,5 @@
 import { HypersyncClient, Decoder } from "@envio-dev/hypersync-client";
-import { erc20InThreshold, erc20OutThreshold, targetAddress } from "./config";
+import { erc20InThreshold, erc20OutThreshold, hyperSyncEndpoint, targetAddress } from "./config";
 
 // Convert address to topic for filtering. Padds the address with zeroes.
 function addressToTopic(address: string): string {
@@ -13,7 +13,7 @@ async function main() {
 
   // Create hypersync client using the mainnet hypersync endpoint
   const client = HypersyncClient.new({
-    url: "http://eth.backup.hypersync.xyz",
+    url: hyperSyncEndpoint,
     maxNumRetries: 0,
   });
 

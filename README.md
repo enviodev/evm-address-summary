@@ -30,3 +30,7 @@ Since there are many spam ERC20 tokens, we added a configuration file (`config.t
 
 You can adjust the `erc20InThreshold` and `erc20OutThreshold` values thresholds in `config.ts`.
 
+You can also query other supported EVM networks by updating the `hyperSyncEndpoint` variable with another [network endpoint](https://docs.envio.dev/docs/hypersync-url-endpoints).
+
+
+
