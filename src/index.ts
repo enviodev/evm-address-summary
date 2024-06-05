@@ -1,12 +1,18 @@
 import { HypersyncClient, Decoder } from "@envio-dev/hypersync-client";
-import { erc20InThreshold, erc20OutThreshold, hyperSyncEndpoint, targetAddress } from "./config";
+import {
+  erc20InThreshold,
+  erc20OutThreshold,
+  hyperSyncEndpoint,
+  targetAddress,
+} from "./config";
 
 // Convert address to topic for filtering. Padds the address with zeroes.
 function addressToTopic(address: string): string {
   return "0x000000000000000000000000" + address.slice(2, address.length);
 }
 
-const transferEventSigHash = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
+const transferEventSigHash =
+  "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 
 async function main() {
   console.time("Script Execution Time");
@@ -75,7 +81,14 @@ async function main() {
   let transaction_count_in = 0;
   let transaction_count_out = 0;
 
-  const erc20_volumes: { [address: string]: { in: bigint, out: bigint, count_in: number, count_out: number } } = {};
+  const erc20_volumes: {
+    [address: string]: {
+      in: bigint;
+      out: bigint;
+      count_in: number;
+      count_out: number;
+    };
+  } = {};
 
   while (true) {
     const res = await receiver.recv();
@@ -94,7 +107,13 @@ async function main() {
       const rawLogData = res.data.logs[i];
 
       // skip invalid logs
-      if (log == undefined || log.indexed.length < 2 || log.body.length < 1 || rawLogData == undefined || rawLogData.address == undefined) {
+      if (
+        log == undefined ||
+        log.indexed.length < 2 ||
+        log.body.length < 1 ||
+        rawLogData == undefined ||
+        rawLogData.address == undefined
+      ) {
         continue;
       }
 
@@ -104,7 +123,12 @@ async function main() {
       const from = log.indexed[0].val as string;
 
       if (!erc20_volumes[erc20Address]) {
-        erc20_volumes[erc20Address] = { in: BigInt(0), out: BigInt(0), count_in: 0, count_out: 0 };
+        erc20_volumes[erc20Address] = {
+          in: BigInt(0),
+          out: BigInt(0),
+          count_in: 0,
+          count_out: 0,
+        };
       }
 
       if (from === targetAddress) {
@@ -123,13 +147,12 @@ async function main() {
         continue;
       }
 
-
       if (tx.from === targetAddress) {
         transaction_count_out++;
         total_wei_volume_out += BigInt(tx.value);
-      } else /*if (tx.to === targetAddress)*/ {
+      } /*if (tx.to === targetAddress)*/ else {
         transaction_count_in++;
-        total_wei_volume_in += BigInt(tx.value)
+        total_wei_volume_in += BigInt(tx.value);
       }
     }
   }
@@ -137,15 +160,22 @@ async function main() {
   console.timeEnd("Script Execution Time");
 
   // Print the collected information
-  console.log(`Total # of transactions made by account - in: ${transaction_count_in} out: ${transaction_count_out}`);
+  console.log(
+    `Total # of transactions made by account - in: ${transaction_count_in} out: ${transaction_count_out}`
+  );
   console.log(`Total Ether volume in: ${total_wei_volume_in}`);
   console.log(`Total Ether volume out: ${total_wei_volume_out}`);
   console.log("ERC20 token transactions and volumes:");
 
   for (const [address, volume] of Object.entries(erc20_volumes)) {
-    if (volume.count_in >= erc20InThreshold && volume.count_out <= erc20OutThreshold) {
+    if (
+      volume.count_in >= erc20InThreshold &&
+      volume.count_out >= erc20OutThreshold
+    ) {
       console.log(`Token: ${address}`);
-      console.log(`  Total # of ERC20 transactions - in: ${volume.count_in} out: ${volume.count_out}`);
+      console.log(
+        `  Total # of ERC20 transactions - in: ${volume.count_in} out: ${volume.count_out}`
+      );
       console.log(`  Total ERC20 volume in: ${volume.in}`);
       console.log(`  Total ERC20 volume out: ${volume.out}`);
     }
@@ -153,4 +183,3 @@ async function main() {
 }
 
 main();
-
