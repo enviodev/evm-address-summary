@@ -107,7 +107,7 @@ async function main() {
 
       // skip invalid logs
       if (
-        log === null || rawLogData.address === undefined || log === undefined
+        log == undefined || rawLogData.address === undefined
       ) {
         continue;
       }
