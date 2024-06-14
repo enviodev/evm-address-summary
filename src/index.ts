@@ -1,19 +1,11 @@
 import { HypersyncClient, Decoder } from "@envio-dev/hypersync-client";
 import {
-  erc20InThreshold,
-  erc20OutThreshold,
   hyperSyncEndpoint,
   targetAddress,
 } from "./config";
-import assert from "assert";
-
-// Convert address to topic for filtering. Padds the address with zeroes.
-function addressToTopic(address: string): string {
-  return "0x000000000000000000000000" + address.slice(2, address.length);
-}
 
 const transferEventSigHash =
-  "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
+  "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"; // ERC721 Transfer event signature
 
 async function main() {
   console.time("Script Execution Time");
@@ -25,67 +17,31 @@ async function main() {
 
   // The query to run
   const query = {
-    // start from block 0 and go to the end of the chain (we don't specify a toBlock).
-    fromBlock: 0,
-    // The logs we want. We will also automatically get transactions and blocks relating to these logs (the query implicitly joins them).
+    fromBlock: 4605167,
     logs: [
       {
-        // We want All ERC20 transfers coming to any of our addresses
+        address: [targetAddress],
         topics: [
           [transferEventSigHash],
-          [],
-          [addressToTopic(targetAddress)],
-          [],
-        ],
-      },
-      {
-        // We want All ERC20 transfers going from any of our addresses
-        topics: [
-          [transferEventSigHash],
-          [addressToTopic(targetAddress)],
-          [],
-          [],
         ],
       },
     ],
-    transactions: [
-      // get all transactions coming from and going to any of our addresses.
-      {
-        from: [targetAddress],
-      },
-      {
-        to: [targetAddress],
-      },
-    ],
-    // Select the fields we are interested in, notice topics are selected as topic0,1,2,3
     fieldSelection: {
-      transaction: ["from", "to", "value"],
-      log: ["data", "address", "topic0", "topic1", "topic2"],
+      block: ["timestamp"],
+      log: ["data", "topic0", "topic1", "topic2"],
     },
   };
 
   console.log("Running the query...");
 
-  const receiver = await client.stream(query, {});
+  const receiver = await client.streamEvents(query, {});
 
   const decoder = Decoder.fromSignatures([
-    "Transfer(address indexed from, address indexed to, uint amount)",
+    "Transfer(address indexed from, address indexed to, uint256 tokenId)",
   ]);
 
-  // Let's count total volume for each address, it is meaningless because of currency differences but good as an example.
-  let total_wei_volume_in = BigInt(0);
-  let total_wei_volume_out = BigInt(0);
-  let transaction_count_in = 0;
-  let transaction_count_out = 0;
-
-  const erc20_volumes: {
-    [address: string]: {
-      in: bigint;
-      out: bigint;
-      count_in: number;
-      count_out: number;
-    };
-  } = {};
+  // Let's track NFT interactions for each address
+  const nftInteractions = {};
 
   while (true) {
     const res = await receiver.recv();
@@ -94,88 +50,87 @@ async function main() {
     }
 
     console.log(`scanned up to block: ${res.nextBlock}`);
+    console.log(res)
+    console.log("number of logs found", res.data.length)
 
-    // Decode the log on a background thread so we don't block the event loop.
-    // Can also use decoder.decodeLogsSync if it is more convenient.
-    const decodedLogs = await decoder.decodeLogs(res.data.logs);
 
-    assert.equal(decodedLogs.length, res.data.logs.length);
-
+    const decodedLogs = await decoder.decodeEvents(res.data);
+    console.log("decoded logs", decodedLogs.length, res.data.length)
     for (let i = 0; i < decodedLogs.length; i++) {
+      // console.log("looping through logs")
       const log = decodedLogs[i];
-      const rawLogData = res.data.logs[i];
+      const rawLogData = res.data[i];
+      console.log("log", rawLogData)
 
-      // skip invalid logs
       if (
-        log == undefined || rawLogData.address === undefined
+        log == undefined || rawLogData.block == undefined
       ) {
         continue;
       }
 
-      const to = log.indexed[1].val as string;
-      const value = log.body[0].val as bigint;
-      const erc20Address = rawLogData.address.toLowerCase();
       const from = log.indexed[0].val as string;
-
-      if (!erc20_volumes[erc20Address]) {
-        erc20_volumes[erc20Address] = {
-          in: BigInt(0),
-          out: BigInt(0),
-          count_in: 0,
-          count_out: 0,
-        };
-      }
-
-      if (from === targetAddress) {
-        erc20_volumes[erc20Address].out += value;
-        erc20_volumes[erc20Address].count_out++;
-      }
-      if (to === targetAddress) {
-        erc20_volumes[erc20Address].in += value;
-        erc20_volumes[erc20Address].count_in++;
-      }
-    }
-
-    for (const tx of res.data.transactions) {
-      if (!tx.from || !tx.to || tx.value == undefined) {
-        console.log("values are undefined");
-        continue;
-      }
-
-      if (tx.from === targetAddress) {
-        transaction_count_out++;
-        total_wei_volume_out += BigInt(tx.value);
-      } /*if (tx.to === targetAddress)*/ else {
-        transaction_count_in++;
-        total_wei_volume_in += BigInt(tx.value);
-      }
+      const to = log.indexed[1].val as string;
+      const tokenId = log.body[0].val as bigint;
+      console.log("info I care about")
+      // const timestamp = res.data.transactions[i].timestamp;
+      //
+      // if (!nftInteractions[nftAddress]) {
+      //   nftInteractions[nftAddress] = {};
+      // }
+      //
+      // if (!nftInteractions[nftAddress][from]) {
+      //   nftInteractions[nftAddress][from] = {};
+      // }
+      //
+      // if (!nftInteractions[nftAddress][to]) {
+      //   nftInteractions[nftAddress][to] = {};
+      // }
+      //
+      // if (!nftInteractions[nftAddress][from][tokenId]) {
+      //   nftInteractions[nftAddress][from][tokenId] = {
+      //     transfersOut: 0,
+      //     lastInteraction: timestamp,
+      //   };
+      // }
+      //
+      // if (!nftInteractions[nftAddress][to][tokenId]) {
+      //   nftInteractions[nftAddress][to][tokenId] = {
+      //     transfersIn: 0,
+      //     lastInteraction: timestamp,
+      //   };
+      // }
+      //
+      // if (from === targetAddress) {
+      //   nftInteractions[nftAddress][from][tokenId].transfersOut++;
+      //   nftInteractions[nftAddress][from][tokenId].lastInteraction = timestamp;
+      // }
+      // if (to === targetAddress) {
+      //   nftInteractions[nftAddress][to][tokenId].transfersIn++;
+      //   nftInteractions[nftAddress][to][tokenId].lastInteraction = timestamp;
+      // }
     }
   }
 
   console.timeEnd("Script Execution Time");
 
-  // Print the collected information
-  console.log(
-    `Total # of transactions made by account - in: ${transaction_count_in} out: ${transaction_count_out}`
-  );
-  console.log(`Total Ether volume in: ${total_wei_volume_in}`);
-  console.log(`Total Ether volume out: ${total_wei_volume_out}`);
-  console.log("ERC20 token transactions and volumes:");
-
-  for (const [address, volume] of Object.entries(erc20_volumes)) {
-    if (
-      volume.count_in >= erc20InThreshold &&
-      volume.count_out >= erc20OutThreshold
-    ) {
-      console.log(`Token: ${address}`);
-      console.log(
-        `  Total # of ERC20 transactions - in: ${volume.count_in} out: ${volume.count_out}`
-      );
-      console.log(`  Total ERC20 volume in: ${volume.in}`);
-      console.log(`  Total ERC20 volume out: ${volume.out}`);
-      console.log(`  Final ERC20 balance: ${volume.in - volume.out}`);
-    }
-  }
+  // console.log("NFT interactions:");
+  // for (const [address, users] of Object.entries(nftInteractions)) {
+  //   console.log(`NFT Contract: ${address}`);
+  //   for (const [user, tokens] of Object.entries(users)) {
+  //     console.log(`  User Address: ${user}`);
+  //     for (const [tokenId, data] of Object.entries(tokens)) {
+  //       console.log(`    Token ID: ${tokenId}`);
+  //       if (data.transfersIn !== undefined) {
+  //         console.log(`      Transfers In: ${data.transfersIn}`);
+  //       }
+  //       if (data.transfersOut !== undefined) {
+  //         console.log(`      Transfers Out: ${data.transfersOut}`);
+  //       }
+  //       console.log(`      Last Interaction: ${new Date(data.lastInteraction * 1000)}`);
+  //     }
+  //   }
+  // }
 }
-
+  
 main();
+
