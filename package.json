@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node src/index.ts"
+    "all-transfers": "ts-node src/all-transfers/index.ts",
+    "nft-holders": "ts-node src/all-transfers/index.ts"
   },
   "keywords": [],
   "author": "",
@@ -14,7 +15,7 @@
     "typescript": "^4.5.4"
   },
   "dependencies": {
-    "@envio-dev/hypersync-client": "^0.2.7",
+    "@envio-dev/hypersync-client": "^0.2.8",
     "ts-node": "^10.9.2"
   }
 }
