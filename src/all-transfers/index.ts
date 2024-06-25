@@ -5,7 +5,6 @@ import {
   hyperSyncEndpoint,
   targetAddress,
 } from "./config";
-import assert from "assert";
 
 // Convert address to topic for filtering. Padds the address with zeroes.
 function addressToTopic(address: string): string {
@@ -21,6 +20,7 @@ async function main() {
   // Create hypersync client using the mainnet hypersync endpoint
   const client = HypersyncClient.new({
     url: hyperSyncEndpoint,
+    maxNumRetries: 0,
   });
 
   // The query to run
@@ -66,7 +66,10 @@ async function main() {
 
   console.log("Running the query...");
 
-  const receiver = await client.stream(query, {});
+  const receiver = await client.stream(query, {
+    concurrency: 48,
+    maxBatchSize: 10000,
+  });
 
   const decoder = Decoder.fromSignatures([
     "Transfer(address indexed from, address indexed to, uint amount)",
@@ -99,15 +102,17 @@ async function main() {
     // Can also use decoder.decodeLogsSync if it is more convenient.
     const decodedLogs = await decoder.decodeLogs(res.data.logs);
 
-    assert.equal(decodedLogs.length, res.data.logs.length);
-
     for (let i = 0; i < decodedLogs.length; i++) {
       const log = decodedLogs[i];
       const rawLogData = res.data.logs[i];
 
       // skip invalid logs
       if (
-        log == undefined || rawLogData.address === undefined
+        log == undefined ||
+        log.indexed.length < 2 ||
+        log.body.length < 1 ||
+        rawLogData == undefined ||
+        rawLogData.address == undefined
       ) {
         continue;
       }
@@ -173,7 +178,6 @@ async function main() {
       );
       console.log(`  Total ERC20 volume in: ${volume.in}`);
       console.log(`  Total ERC20 volume out: ${volume.out}`);
-      console.log(`  Final ERC20 balance: ${volume.in - volume.out}`);
     }
   }
 }
