@@ -13,7 +13,7 @@ if (!/^0x[a-fA-F0-9]{40}$/.test(targetContract)) {
 }
 
 export const holdDispalyThreshold = 10;
-export const hasIndexedToAndFromTopics = process.env.NOT_INDEXED_TO_FROM != "true"; // If you want to run this on NFTs such as crypto-kitties, you'll need this on since those NFTs don't conform to the standard.
-export const hyperSyncEndpoint = "https://eth.backup.hypersync.xyz"; // More networks can be found here: https://docs.envio.dev/docs/hypersync-url-endpoints
+export const hasIndexedToAndFromTopics =
+  process.env.NOT_INDEXED_TO_FROM != "true"; // If you want to run this on NFTs such as crypto-kitties, you'll need this on since those NFTs don't conform to the standard.
+export const hyperSyncEndpoint = "https://eth.hypersync.xyz"; // More networks can be found here: https://docs.envio.dev/docs/hypersync-url-endpoints
 export { targetContract };
-

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "all-transfers": "ts-node src/all-transfers/index.ts",
-    "nft-holders": "ts-node src/all-transfers/index.ts"
+    "nft-holders": "ts-node src/nft-holders/index.ts"
   },
   "keywords": [],
   "author": "",
