@@ -24,7 +24,7 @@ async function main() {
     ],
     fieldSelection: {
       block: ["timestamp"],
-      log: ["data", "topic0", "topic1", "topic2"],
+      log: ["data", "topic0", "topic1", "topic2", "topic3"],
     },
   };
 
@@ -34,7 +34,7 @@ async function main() {
 
   const decoder = Decoder.fromSignatures([
     hasIndexedToAndFromTopics
-      ? "Transfer(address indexed from, address indexed to, uint256 tokenId)"
+      ? "Transfer(address indexed from, address indexed to, uint256 indexed tokenId)"
       : "Transfer(address from, address to, uint256 tokenId)",
   ]);
 
@@ -68,7 +68,7 @@ async function main() {
         !log.indexed ||
         !log.body ||
         log.indexed.length < (hasIndexedToAndFromTopics ? 2 : 0) ||
-        log.body.length < (hasIndexedToAndFromTopics ? 1 : 3)
+        log.body.length < (hasIndexedToAndFromTopics ? 0 : 3)
       ) {
         continue;
       }
@@ -77,7 +77,8 @@ async function main() {
         .val as string;
       const to = (hasIndexedToAndFromTopics ? log.indexed[1] : log.body[1])
         .val as string;
-      const tokenId = log.body[hasIndexedToAndFromTopics ? 0 : 2].val as bigint;
+      const tokenId = (hasIndexedToAndFromTopics ? log.indexed[2] : log.body[2])
+        .val as bigint;
 
       if (!nftInteractions[from]) {
         nftInteractions[from] = {
@@ -100,15 +101,15 @@ async function main() {
 
       nftInteractions[to].tokenIds.add(tokenId);
       nftInteractions[to].transfersIn += 1;
+
+      // console.log(`From: ${from}, To: ${to}, Token ID: ${tokenId}`);
     }
   }
 
   console.log("Summary of addresses owning more than 10 tokens:");
   for (const [address, interaction] of Object.entries(nftInteractions)) {
     console.log(
-      `Address: ${address}, Token IDs: ${Array.from(interaction.tokenIds).join(
-        ", "
-      )}`
+      `Address: ${address}, Token IDs: ${Array.from(interaction.tokenIds).join(", ")}`
     );
     if (interaction.tokenIds.size > holdDispalyThreshold) {
       console.log(`Address: ${address}`);
