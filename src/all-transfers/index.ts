@@ -108,7 +108,7 @@ async function main() {
 
     console.log(`scanned up to block: ${res.nextBlock}`);
 
-    if (ignoreErc20) {
+    if (!ignoreErc20) {
       // Decode the log on a background thread so we don't block the event loop.
       // Can also use decoder.decodeLogsSync if it is more convenient.
       const decodedLogs = await decoder.decodeLogs(res.data.logs);
