@@ -5,6 +5,7 @@ import {
   hyperSyncEndpoint,
   targetAddress,
 } from "./config";
+// import assert from "assert";
 
 // Convert address to topic for filtering. Padds the address with zeroes.
 function addressToTopic(address: string): string {
@@ -13,6 +14,7 @@ function addressToTopic(address: string): string {
 
 const transferEventSigHash =
   "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
+console.log(`  Total Ether volume in: ${total_wei_volume_in}`);
 
 async function main() {
   console.time("Script Execution Time");
@@ -48,19 +50,21 @@ async function main() {
         ],
       },
     ],
+    trace: [{ kind: ["call", "reward"] }],
     transactions: [
       // get all transactions coming from and going to any of our addresses.
       {
         from: [targetAddress],
       },
-      {
-        to: [targetAddress],
-      },
+      // {
+      //   to: [targetAddress],
+      // },
     ],
     // Select the fields we are interested in, notice topics are selected as topic0,1,2,3
     fieldSelection: {
-      transaction: ["from", "to", "value"],
+      transaction: ["value", "to", "from", "gas_used", "gas_price"],
       log: ["data", "address", "topic0", "topic1", "topic2"],
+      trace: ["value", "to", "from"],
     },
   };
 
@@ -109,8 +113,8 @@ async function main() {
       // skip invalid logs
       if (
         log == undefined ||
-        log.indexed.length < 2 ||
-        log.body.length < 1 ||
+        log.indexed.length == 2 ||
+        log.body.length == 1 ||
         rawLogData == undefined ||
         rawLogData.address == undefined
       ) {
@@ -142,19 +146,49 @@ async function main() {
     }
 
     for (const tx of res.data.transactions) {
-      if (!tx.from || !tx.to || tx.value == undefined) {
-        console.log("values are undefined");
+      //// If we get all value transfers from traces we can remove this.
+      //   if (tx.gasUsed == undefined || tx.gasPrice == undefined) {
+      //     console.log("values are undefined");
+      //     continue;
+      //   }
+      //
+      //   // transaction_count_out++; // Should we increment this when paying for gas?
+      //   total_wei_volume_out += BigInt(tx.gasUsed) * BigInt(tx.gasPrice);
+
+      if (!tx.from || !tx.to || tx.value == undefined || tx.gasUsed == undefined || tx.gasPrice == undefined) {
+        console.log("values are undefined", tx);
         continue;
       }
 
       if (tx.from === targetAddress) {
         transaction_count_out++;
-        total_wei_volume_out += BigInt(tx.value);
+        total_wei_volume_out += BigInt(tx.value) + (BigInt(tx.gasUsed) * BigInt(tx.gasPrice));
       } /*if (tx.to === targetAddress)*/ else {
         transaction_count_in++;
         total_wei_volume_in += BigInt(tx.value);
       }
     }
+    for (const tx of res.data.traces) {
+      if (!tx.from || !tx.to || tx.value == undefined) {
+        console.log("values are undefined");
+        continue;
+      }
+
+      //// Sanity check
+      //assert(tx.from === targetAddress || tx.to == targetAddress, `Invalid trace data, neither from nor to is the target address, from: ${tx.from}, to: ${tx.to}, target: ${targetAddress}`)
+      // if (tx.from !== targetAddress && tx.to !== targetAddress) {
+      //   continue; // We will be able to improve this when we have better join modes.
+      // }
+
+      if (tx.from === targetAddress) {
+        transaction_count_out++;
+        total_wei_volume_out += BigInt(tx.value);
+      } else if (tx.to === targetAddress) {
+        transaction_count_in++;
+        total_wei_volume_in += BigInt(tx.value);
+      }
+    }
+
   }
 
   console.timeEnd("Script Execution Time");
@@ -163,8 +197,9 @@ async function main() {
   console.log(
     `Total # of transactions made by account - in: ${transaction_count_in} out: ${transaction_count_out}`
   );
-  console.log(`Total Ether volume in: ${total_wei_volume_in}`);
-  console.log(`Total Ether volume out: ${total_wei_volume_out}`);
+  console.log(`Total Ether volume in: ${total_wei_volume_in - total_wei_volume_out}`);
+  console.log(`  Total Ether volume in: ${total_wei_volume_in}`);
+  console.log(`  Total Ether volume out: ${total_wei_volume_out}`);
   console.log("ERC20 token transactions and volumes:");
 
   for (const [address, volume] of Object.entries(erc20_volumes)) {
@@ -176,8 +211,9 @@ async function main() {
       console.log(
         `  Total # of ERC20 transactions - in: ${volume.count_in} out: ${volume.count_out}`
       );
-      console.log(`  Total ERC20 volume in: ${volume.in}`);
-      console.log(`  Total ERC20 volume out: ${volume.out}`);
+      console.log(`  Total ERC20 balance: ${volume.in - volume.out}`);
+      console.log(`    Total ERC20 volume in: ${volume.in}`);
+      console.log(`    Total ERC20 volume out: ${volume.out}`);
     }
   }
 }
