@@ -194,7 +194,7 @@ async function main() {
   console.log(`Resulting Ether Balance: ${formatEther(total_wei_volume_in - total_wei_volume_out - total_gas_paid)}`);
   console.log(`  Total Ether volume in:  ${formatEther(total_wei_volume_in)}`);
   console.log(`  Total Ether volume out: ${formatEther(total_wei_volume_out)}`);
-  console.log(`  Total gas paid:         ${formatEther(total_gas_paid)}`); 
+  console.log(`  Total gas paid:         ${formatEther(total_gas_paid)}`);
   if (!ignoreErc20) {
     console.log("ERC20 token transactions and volumes:");
     for (const [address, volume] of Object.entries(erc20_volumes)) {
@@ -202,13 +202,13 @@ async function main() {
         volume.count_in >= erc20InThreshold &&
         volume.count_out >= erc20OutThreshold
       ) {
-        console.log(`Token: ${address}`);
+        console.log(`Token: ${address} `);
         console.log(
-          `  Total # of ERC20 transactions - in: ${volume.count_in} out: ${volume.count_out}`
+          `  Total # of ERC20 transactions - in: ${volume.count_in} out: ${volume.count_out} `
         );
-        console.log(`  Total ERC20 balance: ${volume.in - volume.out}`);
-        console.log(`    Total ERC20 volume in: ${volume.in}`);
-        console.log(`    Total ERC20 volume out: ${volume.out}`);
+        console.log(`  Total ERC20 balance: ${volume.in - volume.out} `);
+        console.log(`    Total ERC20 volume in: ${volume.in} `);
+        console.log(`    Total ERC20 volume out: ${volume.out} `);
       }
     }
   }
