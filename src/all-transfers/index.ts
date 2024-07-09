@@ -6,7 +6,7 @@ import {
   ignoreErc20,
   targetAddress,
 } from "./config";
-// import assert from "assert";
+import { formatEther } from "viem";
 
 console.log(`Getting all transactions for target address: ${targetAddress}`);
 
@@ -24,7 +24,7 @@ async function main() {
   // Create hypersync client using the mainnet hypersync endpoint
   const client = HypersyncClient.new({
     url: hyperSyncEndpoint,
-    maxNumRetries: 0,
+    maxNumRetries: 3,
   });
 
   // The query to run
@@ -52,19 +52,16 @@ async function main() {
         ],
       },
     ],
-    trace: [{ kind: ["call", "reward"], to: [targetAddress], from: [targetAddress] }],
+    traces: [{ to: [targetAddress] }, { from: [targetAddress] }],
     transactions: [
-      // get all transactions coming from and going to any of our addresses.
+      // get all transactions coming from our address so we can calculate gas cost.
       {
         from: [targetAddress],
-      },
-      {
-        to: [targetAddress],
-      },
+      }
     ],
     // Select the fields we are interested in, notice topics are selected as topic0,1,2,3
     fieldSelection: {
-      transaction: ["value", "to", "from", "gas_used", "gas_price"],
+      transaction: ["from", "effective_gas_price", "gas_used"],
       log: ignoreErc20 ? [] : ["data", "address", "topic0", "topic1", "topic2"],
       trace: ["value", "to", "from"],
     },
@@ -82,14 +79,13 @@ async function main() {
   ]);
 
   // Let's count total volume for each address, it is meaningless because of currency differences but good as an example.
-  let total_wei_volume_in = BigInt(0);
-  let total_wei_volume_out = BigInt(0);
   let total_gas_paid = BigInt(0);
-  let total_internal_wei_volume_out = BigInt(0);
-  let total_internal_wei_volume_in = BigInt(0);
+  let total_wei_volume_out = BigInt(0);
+  let total_wei_volume_in = BigInt(0);
 
-  let transaction_count_in = 0;
-  let transaction_count_out = 0;
+  let wei_count_in = 0;
+  let wei_count_out = 0;
+  let total_eoa_tx_sent = 0;
 
   const erc20_volumes: {
     [address: string]: {
@@ -158,26 +154,14 @@ async function main() {
     // process transactions for gas
     for (const tx of res.data.transactions) {
       // If we get all value transfers from traces we can remove this.
-      if (tx.gasUsed == undefined || tx.gasPrice == undefined) {
-        console.log("values are undefined");
-        continue;
-      }
-
-
-      // This could shouldn't be necessary is commented out because we are getting the same information from traces.
-      if (!tx.from || !tx.to || tx.value == undefined) {
-        console.log("values are undefined", tx);
+      if (tx.gasUsed == undefined || tx.effectiveGasPrice == undefined || tx.from == undefined) {
+        console.log("values are undefined"); https://github.com/enviodev/hypersync-infra/pull/136
         continue;
       }
 
       if (tx.from === targetAddress) {
-        total_gas_paid += BigInt(tx.gasUsed) * BigInt(tx.gasPrice);
-
-        transaction_count_out++;
-        total_wei_volume_out += BigInt(tx.value)
-      } else if (tx.to === targetAddress) {
-        transaction_count_in++;
-        total_wei_volume_in += BigInt(tx.value);
+        total_eoa_tx_sent += 1;
+        total_gas_paid += BigInt(tx.effectiveGasPrice) * BigInt(tx.gasUsed);
       }
     }
 
@@ -188,19 +172,16 @@ async function main() {
         continue;
       }
 
-      //// Sanity check
-      //assert(tx.from === targetAddress || tx.to == targetAddress, `Invalid trace data, neither from nor to is the target address, from: ${tx.from}, to: ${tx.to}, target: ${targetAddress}`)
-      // if (tx.from !== targetAddress && tx.to !== targetAddress) {
-      //   continue; // We will be able to improve this when we have better join modes.
-      // }
-
       if (tx.from === targetAddress) {
-        transaction_count_out++;
-        total_internal_wei_volume_out += BigInt(tx.value);
+        wei_count_out++;
+        total_wei_volume_out += BigInt(tx.value);
       } else if (tx.to === targetAddress) {
-        transaction_count_in++;
-        total_internal_wei_volume_in += BigInt(tx.value);
+        wei_count_in++;
+        total_wei_volume_in += BigInt(tx.value);
       }
+      // else {
+      //   console.log("Invalid trace data, neither from nor to is the target address");
+      // }
     }
 
   }
@@ -208,14 +189,12 @@ async function main() {
 
   // Print the collected information
   console.log(
-    `Total # of transactions made by account - in: ${transaction_count_in} out: ${transaction_count_out}`
+    `Total # of transactions made by account - Ether IN tx: ${wei_count_in}, Ether OUT tx: ${wei_count_out}, txs paid for (EOA): ${total_eoa_tx_sent}`
   );
-  console.log(`Resulting Ether Balance: ${total_wei_volume_in + total_internal_wei_volume_in - total_wei_volume_out - total_internal_wei_volume_out - total_gas_paid}`);
-  console.log(`  Total Ether volume in (EOA): ${total_wei_volume_in}`);
-  console.log(`  Total Ether volume out (EOA): ${total_wei_volume_out}`);
-  console.log(`  Total Ether volume in (internal): ${total_internal_wei_volume_in}`);
-  console.log(`  Total Ether volume out (internal): ${total_internal_wei_volume_out}`);
-  console.log(`  Total gas paid: ${total_gas_paid}`);
+  console.log(`Resulting Ether Balance: ${formatEther(total_wei_volume_in - total_wei_volume_out - total_gas_paid)}`);
+  console.log(`  Total Ether volume in:  ${formatEther(total_wei_volume_in)}`);
+  console.log(`  Total Ether volume out: ${formatEther(total_wei_volume_out)}`);
+  console.log(`  Total gas paid:         ${formatEther(total_gas_paid)}`); 
   if (!ignoreErc20) {
     console.log("ERC20 token transactions and volumes:");
     for (const [address, volume] of Object.entries(erc20_volumes)) {
