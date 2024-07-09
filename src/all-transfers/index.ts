@@ -1,4 +1,4 @@
-import { HypersyncClient, Decoder } from "@envio-dev/hypersync-client";
+import { HypersyncClient, Decoder, QueryResponseStream } from "@envio-dev/hypersync-client";
 import {
   erc20InThreshold,
   erc20OutThreshold,
@@ -27,12 +27,12 @@ async function main() {
     maxNumRetries: 3,
   });
 
-  // The query to run
-  const query = {
+  // The query to run for erc20 transactions
+  const erc20TransactionLogQuery = {
     // start from block 0 and go to the end of the chain (we don't specify a toBlock).
     fromBlock: 0,
     // The logs we want. We will also automatically get transactions and blocks relating to these logs (the query implicitly joins them).
-    logs: ignoreErc20 ? [] : [
+    logs: [
       {
         // We want All ERC20 transfers coming to any of our addresses
         topics: [
@@ -52,7 +52,16 @@ async function main() {
         ],
       },
     ],
-    traces: [{ to: [targetAddress] }, { from: [targetAddress] }],
+
+    // Select the fields we are interested in, notice topics are selected as topic0,1,2,3
+    fieldSelection: {
+      log: ["data", "address", "topic0", "topic1", "topic2"],
+    },
+  };
+
+  const transactionGasQuery = {
+    // start from block 0 and go to the end of the chain (we don't specify a toBlock).
+    fromBlock: 0,
     transactions: [
       // get all transactions coming from our address so we can calculate gas cost.
       {
@@ -61,15 +70,35 @@ async function main() {
     ],
     // Select the fields we are interested in, notice topics are selected as topic0,1,2,3
     fieldSelection: {
-      transaction: ["from", "effective_gas_price", "gas_used"],
-      log: ignoreErc20 ? [] : ["data", "address", "topic0", "topic1", "topic2"],
+      transaction: ["effective_gas_price", "gas_used"],
+    },
+  };
+
+  // The query to run for traces
+  const traceQuery = {
+    // start from block 0 and go to the end of the chain (we don't specify a toBlock).
+    fromBlock: 0,
+    traces: [{ to: [targetAddress] }, { from: [targetAddress] }],
+    // Select the fields we are interested in, notice topics are selected as topic0,1,2,3
+    fieldSelection: {
       trace: ["value", "to", "from"],
     },
   };
 
-  console.log("Running the query...");
+  console.log("Running the queries...");
 
-  const receiver = await client.stream(query, {
+  // Start the queries concurrently
+  const erc20TransactionLogReceiverPromise = client.stream(erc20TransactionLogQuery, {
+    concurrency: 48,
+    maxBatchSize: 10000,
+  });
+
+  const traceReceiverPromise = client.stream(traceQuery, {
+    concurrency: 48,
+    maxBatchSize: 10000,
+  });
+
+  const transactionGasReceiverPromise = client.stream(transactionGasQuery, {
     concurrency: 48,
     maxBatchSize: 10000,
   });
@@ -96,15 +125,15 @@ async function main() {
     };
   } = {};
 
-  while (true) {
-    const res = await receiver.recv();
-    if (res === null) {
-      break;
-    }
+  const processErc20TransactionLogs = async (receiver: QueryResponseStream) => {
+    while (true) {
+      const res = await receiver.recv();
+      if (res === null) {
+        break;
+      }
 
-    console.log(`scanned up to block: ${res.nextBlock}`);
+      console.log(`Scanned up to block: ${res.nextBlock} (ERC20 Transfers)`);
 
-    if (!ignoreErc20) {
       // Decode the log on a background thread so we don't block the event loop.
       // Can also use decoder.decodeLogsSync if it is more convenient.
       const decodedLogs = await decoder.decodeLogs(res.data.logs);
@@ -123,6 +152,7 @@ async function main() {
           rawLogData == undefined ||
           rawLogData.address == undefined
         ) {
+          console.log("(ERC20 Transaction) values are undefined or mulformed");
           continue;
         }
 
@@ -150,41 +180,69 @@ async function main() {
         }
       }
     }
+  };
 
-    // process transactions for gas
-    for (const tx of res.data.transactions) {
-      // If we get all value transfers from traces we can remove this.
-      if (tx.gasUsed == undefined || tx.effectiveGasPrice == undefined || tx.from == undefined) {
-        console.log("values are undefined"); https://github.com/enviodev/hypersync-infra/pull/136
-        continue;
+  const processTransactionGas = async (receiver: QueryResponseStream) => {
+    while (true) {
+      const res = await receiver.recv();
+      if (res === null) {
+        break;
       }
 
-      if (tx.from === targetAddress) {
+      console.log(`Scanned up to block: ${res.nextBlock} (Gas)`);
+
+      // process transactions for gas
+      for (const tx of res.data.transactions) {
+        // If we get all value transfers from traces we can remove this.
+        if (tx.gasUsed == undefined || tx.effectiveGasPrice == undefined) {
+          console.log("(Gas Query) values are undefined");
+          continue;
+        }
+
         total_eoa_tx_sent += 1;
         total_gas_paid += BigInt(tx.effectiveGasPrice) * BigInt(tx.gasUsed);
       }
     }
+  };
 
-    // process traces for all ether 'value' movements (internal and external)
-    for (const tx of res.data.traces) {
-      if (!tx.from || !tx.to || tx.value == undefined) {
-        console.log("values are undefined");
-        continue;
+  const processTraces = async (receiver: QueryResponseStream) => {
+    while (true) {
+      const res = await receiver.recv();
+      if (res === null) {
+        break;
       }
 
-      if (tx.from === targetAddress) {
-        wei_count_out++;
-        total_wei_volume_out += BigInt(tx.value);
-      } else if (tx.to === targetAddress) {
-        wei_count_in++;
-        total_wei_volume_in += BigInt(tx.value);
+      console.log(`Scanned up to block: ${res.nextBlock} (Ether Transfers)`);
+
+      // process traces for all ether 'value' movements (internal and external)
+      for (const tx of res.data.traces) {
+        if (!tx.from || !tx.to || tx.value == undefined) {
+          console.log("(Ether Transfer) values are undefined");
+          continue;
+        }
+
+        if (tx.from === targetAddress) {
+          wei_count_out++;
+          total_wei_volume_out += BigInt(tx.value);
+        } else if (tx.to === targetAddress) {
+          wei_count_in++;
+          total_wei_volume_in += BigInt(tx.value);
+        }
+        // else {
+        //   console.log("Invalid trace data, neither from nor to is the target address");
+        // }
       }
-      // else {
-      //   console.log("Invalid trace data, neither from nor to is the target address");
-      // }
     }
+  };
 
-  }
+
+  await Promise.all([
+    processTransactionGas(await transactionGasReceiverPromise),
+    processTraces(await traceReceiverPromise),
+  ].concat(ignoreErc20 ? [] : [
+    processErc20TransactionLogs(await erc20TransactionLogReceiverPromise),
+  ]));
+
   console.timeEnd("Script Execution Time");
 
   // Print the collected information
@@ -215,3 +273,4 @@ async function main() {
 }
 
 main();
+
