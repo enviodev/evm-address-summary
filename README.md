@@ -1,6 +1,10 @@
 # address-transactions
 
-This is a project for getting all the fungible (native asset and ERC20 token) transfers from an EVM blockchain for a given address.
+This is a project for getting token (native asset, ERC20 and ERC721 tokens) transfers from an EVM blockchain with small scripts.
+
+Each script has its own goal, and the scripts consist of 2 files - `index.ts` and `config.ts`. The scripts are standalone, kept to a reasonably size, and can be copied and used directly or modified to your own needs. 
+
+The output of these scripts is printed to the terminal, but the results could easily be put in a database or saved to a file.
 
 ## Getting Started
 
@@ -26,11 +30,7 @@ The script scans the entire Ethereum blockchain (from block 0 to the present) an
 
 ## Configuration
 
-Since there are many spam ERC20 tokens, we added a configuration file (`config.ts`) that allows you to filter the printed terminal output. By default, it only shows ERC20 tokens that have either more than 3 transfers in or more than 3 transfers out.
-
-You can adjust the `erc20InThreshold` and `erc20OutThreshold` values thresholds in `config.ts`.
-
-You can also query other supported EVM networks by updating the `hyperSyncEndpoint` variable with another [network endpoint](https://docs.envio.dev/docs/hypersync-url-endpoints).
+Each script has a `config.ts` file but common to all of them is the `hyperSyncEndpoint` variable, you can also query other supported EVM networks by updating the `hyperSyncEndpoint` variable with another [network endpoint](https://docs.envio.dev/docs/hypersync-url-endpoints).
 
 
 
