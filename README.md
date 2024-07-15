@@ -1,16 +1,14 @@
-# address-transactions
+# Address-Transactions
 
-This is a project for getting token (native asset, ERC20 and ERC721 tokens) transfers from an EVM blockchain with small scripts.
+This project provides tools to fetch token transfers, including native assets, ERC20, and ERC721 tokens from an EVM blockchain. Each script within this project focuses on a specific aspect of transaction analysis and is designed to be small, standalone, and easily adaptable for various needs.
 
-Each script has its own goal, and the scripts consist of 2 files - `index.ts` and `config.ts`. The scripts are standalone, kept to a reasonably size, and can be copied and used directly or modified to your own needs. 
-
-The output of these scripts is printed to the terminal, but the results could easily be put in a database or saved to a file.
+The outputs of these scripts are primarily displayed on the terminal, but can also be extended to save results in a database or file, depending on the user's requirements.
 
 ## Getting Started
 
 ### Installation
 
-To run the project, first install the packages with:
+Before running any scripts, ensure you have installed the required packages:
 
 ```sh
 pnpm install
@@ -18,19 +16,27 @@ pnpm install
 
 ### Usage
 
-To start the script, use the following command, replacing `<your address>` with the Ethereum address you want to analyze:
+This project contains multiple scripts, each serving a different purpose. Here is how you can use each script:
 
-```sh
-pnpm start <your address>
-```
+1. **All Transfers**:
+   To analyze all token transfers for a specific Ethereum address:
+
+   ```sh
+   pnpm run all-transfers <your address>
+   ```
+
+2. **NFT Holders**:
+   To fetch information about holders of a specific NFT:
+   ```sh
+   pnpm run nft-holders <your address>
+   ```
+
+Replace `<your address>` with the Ethereum address you want to analyze.
 
 ## Functionality
 
-The script scans the entire Ethereum blockchain (from block 0 to the present) and retrieves all relevant transactions for the given address. It iterates through these transactions and sums up their values to calculate aggregates for each token.
+The scripts scan the Ethereum blockchain from the genesis block to the most recent one, retrieving all relevant transactions for the given address. They iterate through these transactions and calculate aggregates for each token type encountered.
 
 ## Configuration
 
-Each script has a `config.ts` file but common to all of them is the `hyperSyncEndpoint` variable, you can also query other supported EVM networks by updating the `hyperSyncEndpoint` variable with another [network endpoint](https://docs.envio.dev/docs/hypersync-url-endpoints).
-
-
-
+Each script includes a `config.ts` file which can be modified to adjust settings such as the blockchain endpoint. The `hyperSyncEndpoint` variable in `config.ts` is crucial for defining the blockchain source, and you can switch between different EVM-compatible networks by updating this variable with a new [network endpoint](https://docs.envio.dev/docs/hypersync-url-endpoints).
