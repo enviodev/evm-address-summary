@@ -69,10 +69,7 @@ async function main() {
 
   console.log("Running the query...");
 
-  const receiver = await client.stream(query, {
-    concurrency: 48,
-    maxBatchSize: 10000,
-  });
+  const receiver = await client.stream(query, {});
 
   const decoder = Decoder.fromSignatures([
     "Transfer(address indexed from, address indexed to, uint amount)",
