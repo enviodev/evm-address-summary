@@ -1,4 +1,4 @@
-import { HypersyncClient, Decoder } from "@envio-dev/hypersync-client";
+import { HypersyncClient, Decoder, Query, JoinMode } from "@envio-dev/hypersync-client";
 import {
   erc20InThreshold,
   erc20OutThreshold,
@@ -28,7 +28,7 @@ async function main() {
   });
 
   // The query to run
-  const query = {
+  const query: Query = {
     // start from block 0 and go to the end of the chain (we don't specify a toBlock).
     fromBlock: 0,
     // The logs we want. We will also automatically get transactions and blocks relating to these logs (the query implicitly joins them).
@@ -65,6 +65,7 @@ async function main() {
       log: ignoreErc20 ? [] : ["data", "address", "topic0", "topic1", "topic2"],
       trace: ["value", "to", "from"],
     },
+    joinMode: JoinMode.JoinNothing
   };
 
   console.log("Running the query...");
@@ -115,8 +116,6 @@ async function main() {
           log == undefined ||
           log.indexed.length < 2 ||
           log.body.length < 1 ||
-          // log.indexed.length != 2 ||
-          // log.body.length != 1 ||
           rawLogData == undefined ||
           rawLogData.address == undefined
         ) {
@@ -176,9 +175,10 @@ async function main() {
         wei_count_in++;
         total_wei_volume_in += BigInt(tx.value);
       }
-      // else {
-      //   console.log("Invalid trace data, neither from nor to is the target address");
-      // }
+      else {
+        throw new Error("Invalid trace data, neither from nor to is the target address");
+        console.log("Invalid trace data, neither from nor to is the target address");
+      }
     }
 
   }

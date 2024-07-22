@@ -9,21 +9,21 @@ importers:
   .:
     dependencies:
       '@envio-dev/hypersync-client':
-        specifier: ^0.2.8
-        version: 0.2.8
+        specifier: 0.3.3
+        version: 0.3.3
       ts-node:
         specifier: ^10.9.2
-        version: 10.9.2(@types/node@20.14.8)(typescript@4.9.5)
+        version: 10.9.2(@types/node@20.14.11)(typescript@5.5.3)
       viem:
         specifier: ^2.17.3
-        version: 2.17.3(typescript@4.9.5)
+        version: 2.17.8(typescript@5.5.3)
     devDependencies:
       '@types/node':
         specifier: ^20.13.0
-        version: 20.14.8
+        version: 20.14.11
       typescript:
-        specifier: ^4.5.4
-        version: 4.9.5
+        specifier: ^5.0.4
+        version: 5.5.3
 
 packages:
 
@@ -34,46 +34,52 @@ packages:
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
     engines: {node: '>=12'}
 
-  '@envio-dev/hypersync-client-darwin-arm64@0.2.8':
-    resolution: {integrity: sha512-lJN44CZ8In7LN3XpY/K+2FUgYb4chSIN8BuxIGGhK+aq0gBOzW/TDTN6rARFlEp5Yxe7y4kmuSCJiNgWH5d7DQ==}
+  '@envio-dev/hypersync-client-darwin-arm64@0.3.3':
+    resolution: {integrity: sha512-mxN21X7ouY4DWi5LurcFKDssFjbY82uz9y58zIs0me5CyX+I92Aj1PTx38kXQLWIZHgt3SF1sHkE7pKVm2wqbg==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [darwin]
 
-  '@envio-dev/hypersync-client-linux-arm64-gnu@0.2.8':
-    resolution: {integrity: sha512-gst3isrX9vd6VYWkBsdCd0B3xfHulb93Go+J7+PVZdgtfFf22bFvnHLoG9l+AXTyH0kz2RPlBCJax+Ot7B8EiA==}
+  '@envio-dev/hypersync-client-darwin-x64@0.3.3':
+    resolution: {integrity: sha512-vu55gsimp/48I1NofaHVG0rqQJawSF/WFl1IdUSIDWKLx4eeQO16ZQGpNCxtCsDjLNSHl2XWvvLrbtLbknvRbg==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@envio-dev/hypersync-client-linux-arm64-gnu@0.3.3':
+    resolution: {integrity: sha512-ujgWh0xpgoGVv/eSr4baTA6E2wM181QwRxiifEIdkMPDPqy2TBKvuSDWxsxd+ObjfHKuZbiBhLg3HxDhohSBDQ==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
 
-  '@envio-dev/hypersync-client-linux-x64-gnu@0.2.8':
-    resolution: {integrity: sha512-5XhuDtb8FHXyPMVSqHoel3E7INfTiMfoqmPKAQQGe1hgEXiSU4BR7zRRxWVL4UVhEF4QYhB+jtYcCvNlTb4g3Q==}
+  '@envio-dev/hypersync-client-linux-x64-gnu@0.3.3':
+    resolution: {integrity: sha512-6I/TjwGHc0NtaUA5c5wrFj5aEeZuujQeOuWHql/5krpUFYz6VIGiLYCl/+qHWiQl+4l2YbLa+OXvdNGhAT1wPA==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
 
-  '@envio-dev/hypersync-client-linux-x64-musl@0.2.8':
-    resolution: {integrity: sha512-g30cCLsA0eaJiGvgFAGLlJKqR7ZZgZ0JQB3Y+RZkNLI2FRFj8kiJB78oc1XMT1Qc5jHfcD5okEk0laBeO2imIg==}
+  '@envio-dev/hypersync-client-linux-x64-musl@0.3.3':
+    resolution: {integrity: sha512-iPVga2vgg3kLfpva1CSjLzwTzHA20wbdp8Ne2zeg8qRYvVWZx7wHc7qGe4/KugZ4hKTq1EqwUD4LkPoZaA884g==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
 
-  '@envio-dev/hypersync-client-win32-x64-msvc@0.2.8':
-    resolution: {integrity: sha512-26pbAv6Gb1dv7JC9SVnH1xli1efisNu04mi+ACF9kTS2aUPiXDdVjFSgeHT02mB2aOoTz02Td3yLrlaBefE5/w==}
+  '@envio-dev/hypersync-client-win32-x64-msvc@0.3.3':
+    resolution: {integrity: sha512-JlDSruiDYcEHS2k+nL9pdyKqX6yx4EC8nrqpHWdZwJsFpMM8kIFdztxpRX8Kv/urz2b8VCyWM7+dS40GMROUJg==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [win32]
 
-  '@envio-dev/hypersync-client@0.2.8':
-    resolution: {integrity: sha512-dra+OxXn8MwsWpzY0b/P3PmW4ETkw5be2OGlkkAeYfeqMtcEAJhlo1uumldhBYb3D1Fj5px6kGO0WkuI1AIVjQ==}
+  '@envio-dev/hypersync-client@0.3.3':
+    resolution: {integrity: sha512-sQutd3n16nQZVfGzLdP8asJ1vD3e+qLbuZBJPAzlpZMbds2kfh8M8BgtEsTTeDCapb3cqJ4nIwEs69KQsI8zeA==}
     engines: {node: '>= 10'}
 
   '@jridgewell/resolve-uri@3.1.2':
     resolution: {integrity: sha512-bRISgCIjP20/tbWSPWMEi54QVPRZExkuD9lJL+UIxUKtwVJA8wW1Trb1jMs1RFXo1CBTNZ/5hpC9QvmKWdopKw==}
     engines: {node: '>=6.0.0'}
 
-  '@jridgewell/sourcemap-codec@1.4.15':
-    resolution: {integrity: sha512-eF2rxCRulEKXHTRiDrDy6erMYWqNw4LPdQ8UQA4huuxaQsVeRPFl2oM8oDGxMFhJUWZf9McpLtJasDDZb/Bpeg==}
+  '@jridgewell/sourcemap-codec@1.5.0':
+    resolution: {integrity: sha512-gv3ZRaISU3fjPAgNsriBRqGWQL6quFx04YMPW/zD8XMLsU32mhCCbfbO6KZFLjvYpCZ8zyDEgqsgf+PwPaM7GQ==}
 
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
@@ -106,8 +112,8 @@ packages:
   '@tsconfig/node16@1.0.4':
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
 
-  '@types/node@20.14.8':
-    resolution: {integrity: sha512-DO+2/jZinXfROG7j7WKFn/3C6nFwxy2lLpgLjEXJz+0XKphZlTLJ14mo8Vfg8X5BWN6XjyESXq+LcYdT7tR3bA==}
+  '@types/node@20.14.11':
+    resolution: {integrity: sha512-kprQpL8MMeszbz6ojB5/tU8PLN4kesnN8Gjzw349rDlNgsSzg90lAVj3llK99Dh7JON+t9AuscPPFW6mPbTnSA==}
 
   abitype@1.0.5:
     resolution: {integrity: sha512-YzDhti7cjlfaBhHutMaboYB21Ha3rXR9QTkNJFzYC4kC8YclaiwPBBBJY8ejFdu2wnJeZCVZSMlQJ7fi8S6hsw==}
@@ -124,8 +130,8 @@ packages:
     resolution: {integrity: sha512-MxXdReSRhGO7VlFe1bRG/oI7/mdLV9B9JJT0N8vZOhF7gFRR5l3M8W9G8JxmKV+JC5mGqJ0QvqfSOLsCPa4nUw==}
     engines: {node: '>=0.4.0'}
 
-  acorn@8.12.0:
-    resolution: {integrity: sha512-RTvkC4w+KNXrM39/lWCUaG0IbRkWdCv7W/IOW9oU6SawyxulvkQy5HQPVTKxEjczcUvapcrw3cFx/60VN/NRNw==}
+  acorn@8.12.1:
+    resolution: {integrity: sha512-tcpGyI9zbizT9JbV6oYE477V6mTlXvvi0T0G3SNIYE2apm/G5huBa1+K89VGeovbg+jycCrfhl3ADxErOuO6Jg==}
     engines: {node: '>=0.4.0'}
     hasBin: true
 
@@ -161,9 +167,9 @@ packages:
       '@swc/wasm':
         optional: true
 
-  typescript@4.9.5:
-    resolution: {integrity: sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==}
-    engines: {node: '>=4.2.0'}
+  typescript@5.5.3:
+    resolution: {integrity: sha512-/hreyEujaB0w76zKo6717l3L0o/qEUtRgdvUBvlkhoWeOVMjMuHNHk0BRBzikzuGDqNmPQbg5ifMEqsHLiIUcQ==}
+    engines: {node: '>=14.17'}
     hasBin: true
 
   undici-types@5.26.5:
@@ -172,8 +178,8 @@ packages:
   v8-compile-cache-lib@3.0.1:
     resolution: {integrity: sha512-wa7YjyUGfNZngI/vtK0UHAN+lgDCxBPCylVXGp0zu59Fz5aiGtNXaq3DhIov063MorB+VfufLh3JlF2KdTK3xg==}
 
-  viem@2.17.3:
-    resolution: {integrity: sha512-FY/1uBQWfko4Esy8mU1RamvL64TLy91LZwFyQJ20E6AI3vTTEOctWfSn0pkMKa3okq4Gxs5dJE7q1hmWOQ7xcw==}
+  viem@2.17.8:
+    resolution: {integrity: sha512-AnLX26/8UAVguXvTc+o5jvehAUfoujomH+WLPNCo0Y0ukb9Z4qWpunkHvPyazeExP2V7EevVJB79mstZh0fLsQ==}
     peerDependencies:
       typescript: '>=5.0.4'
     peerDependenciesMeta:
@@ -204,37 +210,41 @@ snapshots:
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
 
-  '@envio-dev/hypersync-client-darwin-arm64@0.2.8':
+  '@envio-dev/hypersync-client-darwin-arm64@0.3.3':
     optional: true
 
-  '@envio-dev/hypersync-client-linux-arm64-gnu@0.2.8':
+  '@envio-dev/hypersync-client-darwin-x64@0.3.3':
     optional: true
 
-  '@envio-dev/hypersync-client-linux-x64-gnu@0.2.8':
+  '@envio-dev/hypersync-client-linux-arm64-gnu@0.3.3':
     optional: true
 
-  '@envio-dev/hypersync-client-linux-x64-musl@0.2.8':
+  '@envio-dev/hypersync-client-linux-x64-gnu@0.3.3':
     optional: true
 
-  '@envio-dev/hypersync-client-win32-x64-msvc@0.2.8':
+  '@envio-dev/hypersync-client-linux-x64-musl@0.3.3':
     optional: true
 
-  '@envio-dev/hypersync-client@0.2.8':
+  '@envio-dev/hypersync-client-win32-x64-msvc@0.3.3':
+    optional: true
+
+  '@envio-dev/hypersync-client@0.3.3':
     optionalDependencies:
-      '@envio-dev/hypersync-client-darwin-arm64': 0.2.8
-      '@envio-dev/hypersync-client-linux-arm64-gnu': 0.2.8
-      '@envio-dev/hypersync-client-linux-x64-gnu': 0.2.8
-      '@envio-dev/hypersync-client-linux-x64-musl': 0.2.8
-      '@envio-dev/hypersync-client-win32-x64-msvc': 0.2.8
+      '@envio-dev/hypersync-client-darwin-arm64': 0.3.3
+      '@envio-dev/hypersync-client-darwin-x64': 0.3.3
+      '@envio-dev/hypersync-client-linux-arm64-gnu': 0.3.3
+      '@envio-dev/hypersync-client-linux-x64-gnu': 0.3.3
+      '@envio-dev/hypersync-client-linux-x64-musl': 0.3.3
+      '@envio-dev/hypersync-client-win32-x64-msvc': 0.3.3
 
   '@jridgewell/resolve-uri@3.1.2': {}
 
-  '@jridgewell/sourcemap-codec@1.4.15': {}
+  '@jridgewell/sourcemap-codec@1.5.0': {}
 
   '@jridgewell/trace-mapping@0.3.9':
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
-      '@jridgewell/sourcemap-codec': 1.4.15
+      '@jridgewell/sourcemap-codec': 1.5.0
 
   '@noble/curves@1.4.0':
     dependencies:
@@ -263,19 +273,19 @@ snapshots:
 
   '@tsconfig/node16@1.0.4': {}
 
-  '@types/node@20.14.8':
+  '@types/node@20.14.11':
     dependencies:
       undici-types: 5.26.5
 
-  abitype@1.0.5(typescript@4.9.5):
+  abitype@1.0.5(typescript@5.5.3):
     optionalDependencies:
-      typescript: 4.9.5
+      typescript: 5.5.3
 
   acorn-walk@8.3.3:
     dependencies:
-      acorn: 8.12.0
+      acorn: 8.12.1
 
-  acorn@8.12.0: {}
+  acorn@8.12.1: {}
 
   arg@4.1.3: {}
 
@@ -289,42 +299,42 @@ snapshots:
 
   make-error@1.3.6: {}
 
-  ts-node@10.9.2(@types/node@20.14.8)(typescript@4.9.5):
+  ts-node@10.9.2(@types/node@20.14.11)(typescript@5.5.3):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
-      '@types/node': 20.14.8
-      acorn: 8.12.0
+      '@types/node': 20.14.11
+      acorn: 8.12.1
       acorn-walk: 8.3.3
       arg: 4.1.3
       create-require: 1.1.1
       diff: 4.0.2
       make-error: 1.3.6
-      typescript: 4.9.5
+      typescript: 5.5.3
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
 
-  typescript@4.9.5: {}
+  typescript@5.5.3: {}
 
   undici-types@5.26.5: {}
 
   v8-compile-cache-lib@3.0.1: {}
 
-  viem@2.17.3(typescript@4.9.5):
+  viem@2.17.8(typescript@5.5.3):
     dependencies:
       '@adraffy/ens-normalize': 1.10.0
       '@noble/curves': 1.4.0
       '@noble/hashes': 1.4.0
       '@scure/bip32': 1.4.0
       '@scure/bip39': 1.3.0
-      abitype: 1.0.5(typescript@4.9.5)
+      abitype: 1.0.5(typescript@5.5.3)
       isows: 1.0.4(ws@8.17.1)
       ws: 8.17.1
     optionalDependencies:
-      typescript: 4.9.5
+      typescript: 5.5.3
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate

@@ -12,10 +12,10 @@
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^20.13.0",
-    "typescript": "^4.5.4"
+    "typescript": "^5.0.4"
   },
   "dependencies": {
-    "@envio-dev/hypersync-client": "^0.2.8",
+    "@envio-dev/hypersync-client": "0.3.3",
     "ts-node": "^10.9.2",
     "viem": "^2.17.3"
   }
