@@ -15,7 +15,6 @@ pnpm install
 ```
 
 ### Usage
-
 This project contains multiple scripts, each serving a different purpose. Here is how you can use each script:
 
 1. **All Transfers**:
@@ -25,11 +24,15 @@ This project contains multiple scripts, each serving a different purpose. Here i
    pnpm run all-transfers <your address>
    ```
 
+   For more details, see the [All Transfers README](./src/all-transfers/README.md).
+
 2. **NFT Holders**:
    To fetch information about holders of a specific NFT:
    ```sh
    pnpm run nft-holders <your address>
    ```
+
+   For more details, see the [NFT Holders README](./src/nft-holders/README.md).
 
 Replace `<your address>` with the Ethereum address you want to analyze.
 
