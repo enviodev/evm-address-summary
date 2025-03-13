@@ -14,7 +14,16 @@ Before running any scripts, ensure you have installed the required packages:
 pnpm install
 ```
 
+### Example Address
+
+For testing these scripts, e.g:
+
+```
+pnpm run all-erc20-transfers-and-approvals 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
+```
+
 ### Usage
+
 This project contains multiple scripts, each serving a different purpose. Here is how you can use each script:
 
 1. **All Transfers**:
@@ -24,10 +33,11 @@ This project contains multiple scripts, each serving a different purpose. Here i
    pnpm run all-transfers <your address>
    ```
 
-   For more details, see the [All Transfers README](./src/all-transfers/README.md).
+   **Note:** Since this script uses traces for analyzing native token transfers, it is only supported on selected networks that provide trace data. Simply remove the traces section if you wish for other networks.
 
 2. **NFT Holders**:
    To fetch information about holders of a specific NFT:
+
    ```sh
    pnpm run nft-holders <an NFT address>
    ```
@@ -36,6 +46,7 @@ This project contains multiple scripts, each serving a different purpose. Here i
 
 3. **ERC20 Transfers and Approvals**:
    To analyze ERC20 token transfers and approvals for a specific Ethereum address:
+
    ```sh
    pnpm run all-erc20-transfers-and-approvals <your address>
    ```

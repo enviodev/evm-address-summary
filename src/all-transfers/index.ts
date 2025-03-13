@@ -1,4 +1,13 @@
-import { HypersyncClient, Decoder, Query, JoinMode } from "@envio-dev/hypersync-client";
+import {
+  HypersyncClient,
+  Decoder,
+  Query,
+  JoinMode,
+  TransactionField,
+  LogField,
+  TraceField,
+  BlockField,
+} from "@envio-dev/hypersync-client";
 import {
   erc20InThreshold,
   erc20OutThreshold,
@@ -32,40 +41,54 @@ async function main() {
     // start from block 0 and go to the end of the chain (we don't specify a toBlock).
     fromBlock: 0,
     // The logs we want. We will also automatically get transactions and blocks relating to these logs (the query implicitly joins them).
-    logs: ignoreErc20 ? [] : [
-      {
-        // We want All ERC20 transfers coming to any of our addresses
-        topics: [
-          [transferEventSigHash],
-          [],
-          [addressToTopic(targetAddress)],
-          [],
+    logs: ignoreErc20
+      ? []
+      : [
+          {
+            // We want All ERC20 transfers coming to any of our addresses
+            topics: [
+              [transferEventSigHash],
+              [],
+              [addressToTopic(targetAddress)],
+              [],
+            ],
+          },
+          {
+            // We want All ERC20 transfers going from any of our addresses
+            topics: [
+              [transferEventSigHash],
+              [addressToTopic(targetAddress)],
+              [],
+              [],
+            ],
+          },
         ],
-      },
-      {
-        // We want All ERC20 transfers going from any of our addresses
-        topics: [
-          [transferEventSigHash],
-          [addressToTopic(targetAddress)],
-          [],
-          [],
-        ],
-      },
-    ],
     traces: [{ to: [targetAddress] }, { from: [targetAddress] }],
     transactions: [
       // get all transactions coming from our address so we can calculate gas cost.
       {
         from: [targetAddress],
-      }
+      },
     ],
     // Select the fields we are interested in, notice topics are selected as topic0,1,2,3
     fieldSelection: {
-      transaction: ["from", "effective_gas_price", "gas_used"],
-      log: ignoreErc20 ? [] : ["data", "address", "topic0", "topic1", "topic2"],
-      trace: ["value", "to", "from"],
+      transaction: [
+        TransactionField.From,
+        TransactionField.EffectiveGasPrice,
+        TransactionField.GasUsed,
+      ],
+      log: ignoreErc20
+        ? []
+        : [
+            LogField.Data,
+            LogField.Address,
+            LogField.Topic0,
+            LogField.Topic1,
+            LogField.Topic2,
+          ],
+      trace: [TraceField.Value, TraceField.To, TraceField.From],
     },
-    joinMode: JoinMode.JoinNothing
+    joinMode: JoinMode.JoinNothing,
   };
 
   console.log("Running the query...");
@@ -150,9 +173,14 @@ async function main() {
     // process transactions for gas
     for (const tx of res.data.transactions) {
       // If we get all value transfers from traces we can remove this.
-      if (tx.gasUsed == undefined || tx.effectiveGasPrice == undefined || tx.from == undefined) {
-        console.log("values are undefined"); https://github.com/enviodev/hypersync-infra/pull/136
-        continue;
+      if (
+        tx.gasUsed == undefined ||
+        tx.effectiveGasPrice == undefined ||
+        tx.from == undefined
+      ) {
+        console.log("values are undefined");
+        //github.com/enviodev/hypersync-infra/pull/136
+        https: continue;
       }
 
       if (tx.from === targetAddress) {
@@ -174,13 +202,15 @@ async function main() {
       } else if (tx.to === targetAddress) {
         wei_count_in++;
         total_wei_volume_in += BigInt(tx.value);
-      }
-      else {
-        throw new Error("Invalid trace data, neither from nor to is the target address");
-        console.log("Invalid trace data, neither from nor to is the target address");
+      } else {
+        throw new Error(
+          "Invalid trace data, neither from nor to is the target address"
+        );
+        console.log(
+          "Invalid trace data, neither from nor to is the target address"
+        );
       }
     }
-
   }
   console.timeEnd("Script Execution Time");
 
@@ -188,7 +218,11 @@ async function main() {
   console.log(
     `Total # of transactions made by account - Ether IN tx: ${wei_count_in}, Ether OUT tx: ${wei_count_out}, txs paid for (EOA): ${total_eoa_tx_sent}`
   );
-  console.log(`Resulting Ether Balance: ${formatEther(total_wei_volume_in - total_wei_volume_out - total_gas_paid)}`);
+  console.log(
+    `Resulting Ether Balance: ${formatEther(
+      total_wei_volume_in - total_wei_volume_out - total_gas_paid
+    )}`
+  );
   console.log(`  Total Ether volume in:  ${formatEther(total_wei_volume_in)}`);
   console.log(`  Total Ether volume out: ${formatEther(total_wei_volume_out)}`);
   console.log(`  Total gas paid:         ${formatEther(total_gas_paid)}`);
