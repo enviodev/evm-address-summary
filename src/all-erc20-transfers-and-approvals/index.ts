@@ -1,4 +1,10 @@
-import { HypersyncClient, Decoder, Query, JoinMode } from "@envio-dev/hypersync-client";
+import {
+  HypersyncClient,
+  Decoder,
+  Query,
+  JoinMode,
+  LogField,
+} from "@envio-dev/hypersync-client";
 import {
   erc20InThreshold,
   erc20OutThreshold,
@@ -6,7 +12,9 @@ import {
   targetAddress,
 } from "./config";
 
-console.log(`Getting all ERC20 transfers and approvals for target address: ${targetAddress}`);
+console.log(
+  `Getting all ERC20 transfers and approvals for target address: ${targetAddress}`
+);
 
 // Convert address to topic for filtering. Padds the address with zeroes.
 function addressToTopic(address: string): string {
@@ -55,9 +63,16 @@ async function main() {
       },
     ],
     fieldSelection: {
-      log: ["data", "address", "topic0", "topic1", "topic2", "topic3"],
+      log: [
+        LogField.Data,
+        LogField.Address,
+        LogField.Topic0,
+        LogField.Topic1,
+        LogField.Topic2,
+        LogField.Topic3,
+      ],
     },
-    joinMode: JoinMode.JoinNothing
+    joinMode: JoinMode.JoinNothing,
   };
 
   console.log("Running the query...");
@@ -69,8 +84,11 @@ async function main() {
     "Approval(address indexed owner, address indexed spender, uint256 value)",
   ]);
 
-  const erc20_balances: { [address: string]: { balance: bigint, count_in: number, count_out: number } } = {};
-  const erc20_approvals: { [address: string]: { [spender: string]: bigint } } = {};
+  const erc20_balances: {
+    [address: string]: { balance: bigint; count_in: number; count_out: number };
+  } = {};
+  const erc20_approvals: { [address: string]: { [spender: string]: bigint } } =
+    {};
 
   while (true) {
     const res = await receiver.recv();
@@ -104,7 +122,11 @@ async function main() {
         const value = log.body[0].val as bigint;
 
         if (!erc20_balances[erc20Address]) {
-          erc20_balances[erc20Address] = { balance: BigInt(0), count_in: 0, count_out: 0 };
+          erc20_balances[erc20Address] = {
+            balance: BigInt(0),
+            count_in: 0,
+            count_out: 0,
+          };
         }
 
         if (from === targetAddress) {
@@ -135,18 +157,25 @@ async function main() {
   // Print the collected information
   console.log("ERC20 token balances:");
   for (const [address, data] of Object.entries(erc20_balances)) {
-    if (data.count_in >= erc20InThreshold && data.count_out >= erc20OutThreshold) {
+    if (
+      data.count_in >= erc20InThreshold &&
+      data.count_out >= erc20OutThreshold
+    ) {
       console.log(`Token: ${address}`);
       console.log(`  Balance: ${data.balance}`);
-      console.log(`  Total # of ERC20 transactions - in: ${data.count_in} out: ${data.count_out}`);
+      console.log(
+        `  Total # of ERC20 transactions - in: ${data.count_in} out: ${data.count_out}`
+      );
     }
   }
 
   console.log("\nERC20 token approvals:");
   for (const [address, approvals] of Object.entries(erc20_approvals)) {
-    if (erc20_balances[address] &&
+    if (
+      erc20_balances[address] &&
       erc20_balances[address].count_in >= erc20InThreshold &&
-      erc20_balances[address].count_out >= erc20OutThreshold) {
+      erc20_balances[address].count_out >= erc20OutThreshold
+    ) {
       console.log(`Token: ${address}`);
       for (const [spender, value] of Object.entries(approvals)) {
         console.log(`  Approved ${value} to spender: ${spender}`);

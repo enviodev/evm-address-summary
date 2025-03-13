@@ -1,4 +1,9 @@
-import { HypersyncClient, Decoder } from "@envio-dev/hypersync-client";
+import {
+  HypersyncClient,
+  Decoder,
+  BlockField,
+  LogField,
+} from "@envio-dev/hypersync-client";
 import {
   hasIndexedToAndFromTopics,
   holdDispalyThreshold,
@@ -23,8 +28,14 @@ async function main() {
       },
     ],
     fieldSelection: {
-      block: ["timestamp"],
-      log: ["data", "topic0", "topic1", "topic2", "topic3"],
+      block: [BlockField.Timestamp],
+      log: [
+        LogField.Data,
+        LogField.Topic0,
+        LogField.Topic1,
+        LogField.Topic2,
+        LogField.Topic3,
+      ],
     },
   };
 
@@ -109,7 +120,9 @@ async function main() {
   console.log("Summary of addresses owning more than 10 tokens:");
   for (const [address, interaction] of Object.entries(nftInteractions)) {
     console.log(
-      `Address: ${address}, Token IDs: ${Array.from(interaction.tokenIds).join(", ")}`
+      `Address: ${address}, Token IDs: ${Array.from(interaction.tokenIds).join(
+        ", "
+      )}`
     );
     if (interaction.tokenIds.size > holdDispalyThreshold) {
       console.log(`Address: ${address}`);
